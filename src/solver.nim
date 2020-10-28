@@ -64,6 +64,17 @@ proc enforceConsistency[T](
     return some(variables)
 
 
+# MRV: Minimum Remaining Values
+proc selectVariableKey[T](unassigned: TableRef[string, seq[T]]): string =
+    var bestKey: string;
+    var minLen = high(int);
+    for key, value in unassigned:
+        if value.len < minLen:
+            bestKey = key;
+            minLen = value.len;
+
+    return bestKey
+
 proc backtrack[T](
         assigned: TableRef[string, seq[T]],
         unassigned: TableRef[string, seq[T]],
@@ -73,7 +84,9 @@ proc backtrack[T](
             echo assigned
             return true
 
-        var (nextKey, values) = toSeq(unassigned.pairs)[0]
+        #var (nextKey, values) = toSeq(unassigned.pairs)[0]
+        var nextKey = selectVariableKey unassigned
+        var values = unassigned[nextKey]
         unassigned.del(nextKey)
 
         for value in values:
@@ -84,11 +97,21 @@ proc backtrack[T](
             var consistent = consistentResult.get()
             var newUnassigned = newTable[string, seq[T]]()
             var newAssigned = newTable[string, seq[T]]()
+            var emptyFound = false
+
             for key, value in consistent:
+                if value.len == 0:
+                    emptyFound = true
+                    break
+
                 if key in assigned:
                     newAssigned[key] = assigned[key]
                 else:
                     newUnassigned[key] = consistent[key]
+
+            if emptyFound:
+                echo "this isn't a valid path"
+                continue
 
             var result = backtrack(newAssigned, newUnassigned, constraints)
             if result != false:
