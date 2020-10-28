@@ -1,24 +1,18 @@
 import sequtils, sugar, tables, strformat, options
 
 type
-    Constraint[T] = ref object of RootObj
-        variables: seq[string]
-        isSatisfied: varargs[T] -> bool
+    Constraint*[T] = ref object of RootObj
+        variables*: seq[string]
+        isSatisfied*: varargs[T] -> bool
 proc `$`*(v: Constraint): string = &"{{Constraint: \"{v.variables}\"}}"
 
-
-var variables = {
-    "a": toSeq(1..3),
-    "b": toSeq(1..3),
-    "c": toSeq(1..3),
-}.newTable
-
-var constraints = @[
-    Constraint[int](
-        variables: @["a", "b"],
-        isSatisfied: (v: varargs[int]) => v[0] > v[1]
-    ),
-]
+proc allDifferent*[T](variables: seq[string], t: T): seq[Constraint[T]] =
+    proc notEqual(v: varargs[T]): bool = v[0] != v[1]
+    for variable in variables:
+        for otherVariable in variables:
+            if variable == otherVariable:
+                continue
+            result.add Constraint[T](variables: @[variable, otherVariable], isSatisfied: notEqual)
 
 proc partialAssignment[T](assigned: TableRef[string, seq[T]], unassigned: TableRef[string, seq[T]]):
     TableRef[string, seq[T]] =
@@ -102,9 +96,6 @@ proc backtrack[T](
 
         return false
 
-proc solve[T](variables: TableRef[string, seq[T]], constraints: seq[Constraint[T]]): bool =
+proc solve*[T](variables: TableRef[string, seq[T]], constraints: seq[Constraint[T]]): bool =
     var assigned = newTable[string, seq[T]]()
     backtrack(assigned, variables, constraints)
-
-var result = solve[int](variables, constraints)
-echo result

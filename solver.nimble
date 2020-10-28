@@ -5,9 +5,8 @@ author        = "Ruurd Bijlsma"
 description   = "A new awesome nimble package"
 license       = "MIT"
 srcDir        = "src"
-bin           = @["main"]
-
-
+binDir        = "build"
+bin           = @["solver"]
 
 # Dependencies
 
