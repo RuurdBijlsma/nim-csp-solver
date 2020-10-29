@@ -20,14 +20,13 @@ suite "solve csp test":
             ),
         ]
         # give up and stop if this fails
-        let csp = newCSP[int](variables, constraints)
-        var result = solve[int](csp)
+        var result = solve(variables, constraints)
         check(result.isSome)
 
     test "solve sudoku":
         var csp = getSudoku()
         let now = cpuTime()
-        var result = solve[int](csp)
+        var result = solve(csp.variables, csp.constraints)
         var timeTaken = cpuTime() - now
         echo "result = ", result
         echo "time taken: ", timeTaken * 1000 ," ms"

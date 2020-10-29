@@ -137,8 +137,9 @@ proc backtrack[T](
 
         return false
 
-proc solve*[T](csp: CSP[T]): Option[CSP[T]] =
+proc solve*[T](variables: TableRef[string, seq[T]], constraints: seq[Constraint]): Option[CSP[T]] =
     var assigned = newTable[string, seq[T]]()
+    let csp = newCSP[T](variables, constraints)
     discard backtrack(assigned, csp.variables, csp)
     if csp.solutions.len == 0:
         return none(CSP[T])

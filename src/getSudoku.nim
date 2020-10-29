@@ -81,7 +81,7 @@ proc getSudoku*(): CSP[int]=
         stringVariables[key.join(",")] = value
 
     result = newCSP[int](stringVariables, constraints)
-    result.lcv = true
+    result.lcv = false
     result.mrv = true
 
 
