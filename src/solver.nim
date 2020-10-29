@@ -1,4 +1,4 @@
-import sequtils, sugar, tables, strformat, options, csp, constraint
+import sequtils, sugar, tables, options, csp, constraint, algorithm
 
 proc toSolution[T](assigned: TableRef[string, seq[T]]): TableRef[string, T] =
     result = newTable[string, T]()
@@ -8,12 +8,11 @@ proc toSolution[T](assigned: TableRef[string, seq[T]]): TableRef[string, T] =
 
 proc partialAssignment[T](assigned: TableRef[string, seq[T]], unassigned: TableRef[string, seq[T]]):
     TableRef[string, seq[T]] =
-    var result = newTable[string, seq[T]]()
+    result = newTable[string, seq[T]]()
     for key, value in assigned:
         result[key] = value
     for key, value in unassigned:
         result[key] = value
-    return result
 
 proc enforceConsistency[T](
         assigned: TableRef[string, seq[T]],
@@ -46,7 +45,6 @@ proc enforceConsistency[T](
 
     while queue.len > 0:
         let constraint = queue.pop()
-        let head = constraint.variables[0]
         let tail = constraint.variables[1]
         if removeInconsistentValues(constraint, variables):
             if variables[tail].len == 0:
@@ -55,9 +53,40 @@ proc enforceConsistency[T](
 
     return some(variables)
 
+# LCV: Least constraining value
+proc orderValues[T](nextKey: string, assigned: TableRef[string, seq[T]], unassigned: TableRef[string, seq[T]], csp: CSP[T]): auto =
+    if not csp.lcv:
+        return unassigned[nextKey]
+
+    proc countValues(vars: Option[TableRef[string, seq[T]]]): auto =
+        if vars.isNone:
+            return 0
+        let variables = vars.get()
+        var sum = 0
+        for key, value in variables:
+            sum += value.len
+        return sum
+
+    proc valuesEliminated(val: int): auto =
+        assigned[nextKey] = @[val]
+        let newLength = countValues(enforceConsistency(assigned, unassigned, csp.constraints))
+        assigned.del(nextKey)
+        return newLength
+
+    let cache = newTable[T, int]()
+    var values = unassigned[nextKey]
+    for value in values:
+        cache[value] = valuesEliminated(value)
+
+    values.sort((a: T, b: T) => cache[b] - cache[a]);
+    return values;
 
 # MRV: Minimum Remaining Values
-proc selectVariableKey[T](unassigned: TableRef[string, seq[T]]): string =
+proc selectVariableKey[T](unassigned: TableRef[string, seq[T]], csp: CSP[T]): string =
+    if not csp.mrv:
+        for key, value in unassigned:
+            return key
+
     var minLen = high(int);
     for key, value in unassigned:
         if value.len < minLen:
@@ -73,8 +102,8 @@ proc backtrack[T](
             csp.solutions.add toSolution(assigned)
             return true
 
-        var nextKey = selectVariableKey unassigned
-        var values = unassigned[nextKey]
+        var nextKey = selectVariableKey(unassigned, csp)
+        var values = orderValues(nextKey, assigned, unassigned, csp)
         unassigned.del(nextKey)
 
         for value in values:
@@ -101,15 +130,16 @@ proc backtrack[T](
                 echo "this isn't a valid path"
                 continue
 
-            var result = backtrack(newAssigned, newUnassigned, csp)
-            if result != false:
-                return result
+            csp.steps += 1
+
+            if backtrack(newAssigned, newUnassigned, csp):
+                return true
 
         return false
 
-proc solve*[T](csp: CSP[T]): Option[seq[TableRef[string, T]]] =
+proc solve*[T](csp: CSP[T]): Option[CSP[T]] =
     var assigned = newTable[string, seq[T]]()
     discard backtrack(assigned, csp.variables, csp)
     if csp.solutions.len == 0:
-        return none(seq[TableRef[string, T]])
-    some(csp.solutions)
+        return none(CSP[T])
+    some(csp)

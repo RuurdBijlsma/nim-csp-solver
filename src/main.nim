@@ -1,7 +1,8 @@
-import solver, sequtils, sugar, tables, getSudoku, times
+import solver, sequtils, sugar, tables, getSudoku, times, options, csp
 
-var (variables, constraints) = getSudoku()
+var sudoku = getSudoku()
 let now = cpuTime()
-var result = solve[int](variables, constraints)
+var result = solve[int](sudoku)
 var timeTaken = cpuTime() - now
-echo "time taken ", timeTaken * 1000 ," ms"
+echo "result = ", result
+echo "time taken: ", timeTaken * 1000, " ms"

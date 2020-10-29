@@ -23,6 +23,6 @@ proc newCSP*[T](variables: TableRef[string, seq[T]], constraints: seq[Constraint
     result.variables = variables
 
 proc `$`*(c: CSP): string =
-    var constraints = ($c.constraints).substr(0, 60) & "..."
-    var variables = ($c.variables).substr(0, 60) & "..."
-    &"{{CSP constraints: {constraints}, variables: {variables}, solutionCount: {c.solutionCount}, mrv: {c.mrv}, lcv: {c.lcv} }}"
+    #var constraints = ($c.constraints).substr(0, 60) & "..."
+    #var variables = ($c.variables).substr(0, 60) & "..."
+    &"{{CSP solutions: {c.solutions}, steps: {c.steps}, solutionCount: {c.solutionCount}, mrv: {c.mrv}, lcv: {c.lcv} }}"

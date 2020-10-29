@@ -1,4 +1,4 @@
-import solver, sequtils, tables, math, strutils, csp, constraint
+import sequtils, tables, math, strutils, csp, constraint
 
 proc getSudoku*(): CSP[int]=
 
@@ -81,6 +81,8 @@ proc getSudoku*(): CSP[int]=
         stringVariables[key.join(",")] = value
 
     result = newCSP[int](stringVariables, constraints)
+    result.lcv = true
+    result.mrv = true
 
 
     #// CSP sudoku
