@@ -1,6 +1,6 @@
-import solver, sequtils, tables, math, strutils
+import solver, sequtils, tables, math, strutils, csp, constraint
 
-proc getSudoku*(): (TableRef[string, seq[int]], seq[Constraint[int]])=
+proc getSudoku*(): CSP[int]=
 
     const SIZE = 9
     const BLOCK_SIZE = sqrt(SIZE.float).int
@@ -80,7 +80,7 @@ proc getSudoku*(): (TableRef[string, seq[int]], seq[Constraint[int]])=
     for key, value in variables:
         stringVariables[key.join(",")] = value
 
-    return (stringVariables, constraints)
+    result = newCSP[int](stringVariables, constraints)
 
 
     #// CSP sudoku
