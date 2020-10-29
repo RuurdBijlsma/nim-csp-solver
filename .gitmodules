@@ -1,6 +1,0 @@
-[submodule "src/NimMakefile"]
-	path = src/NimMakefile
-	url = https://github.com/Nycto/NimMakefile
-[submodule "NimMakefile"]
-	path = NimMakefile
-	url = https://github.com/Nycto/NimMakefile
