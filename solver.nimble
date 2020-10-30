@@ -6,7 +6,7 @@ description   = "A new awesome nimble package"
 license       = "MIT"
 srcDir        = "src"
 binDir        = "build"
-bin           = @["solver", "main"]
+bin           = @["solver", "main", "wasmtest"]
 
 # Dependencies
 

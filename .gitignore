@@ -1,2 +1,6 @@
 *.exe
 .idea
+main
+solver
+wasmtest
+*.wasm
